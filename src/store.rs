@@ -10,7 +10,7 @@ pub struct Store {
     base_dir: PathBuf,
 }
 
-#[derive(Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Entry {
     pub timestamp: NaiveDateTime,
     pub message: String,
@@ -56,6 +56,27 @@ impl TryFrom<&str> for Entry {
     }
 }
 
+impl Entry {
+    fn to_csv(&self) -> Result<String> {
+        use std::fmt::Write;
+
+        let mut res = String::new();
+
+        let long = match self.long {
+            Some(ref v) => v.as_ref(),
+            None => "",
+        }
+        .replace('"', "\\\"")
+        .replace('\n', "<NEWLINE>");
+
+        let msg = self.message.replace('"', "\\\"").replace('\n', "<NEWLINE>");
+        // TODO: This is ugly AF and should write directly into a stream
+        writeln!(res, r#""{}","{msg}","{long}""#, self.timestamp)?;
+
+        Ok(res)
+    }
+}
+
 impl Store {
     pub fn new<P: Into<PathBuf>>(base_dir: P) -> Result<Self> {
         let base_dir = base_dir.into();
@@ -65,24 +86,9 @@ impl Store {
         Ok(Self { base_dir })
     }
 
-    pub fn push_entry(
-        &self,
-        timestamp: NaiveDateTime,
-        msg: &str,
-        long: Option<impl AsRef<str>>,
-    ) -> Result<()> {
-        let mut track_file = self.get_track_file(&timestamp)?;
-
-        let long = match long {
-            Some(ref v) => v.as_ref(),
-            None => "",
-        }
-        .replace('"', "\\\"")
-        .replace('\n', "<NEWLINE>");
-
-        let msg = msg.replace('"', "\\\"").replace('\n', "<NEWLINE>");
-
-        writeln!(track_file, r#""{timestamp}","{msg}","{long}""#,)?;
+    pub fn push_entry(&self, entry: Entry) -> Result<()> {
+        let mut track_file = self.get_track_file(&entry.timestamp)?;
+        write!(track_file, "{}", entry.to_csv()?)?;
 
         Ok(())
     }
@@ -101,6 +107,17 @@ impl Store {
             .filter(|l| !l.is_empty())
             .map(|line| line.try_into())
             .collect()
+    }
+
+    pub fn set(&self, date: NaiveDate, entries: Vec<Entry>) -> Result<()> {
+        let path = self.get_track_file_name(date);
+        let mut track_file = File::create(path)?;
+
+        for e in entries {
+            write!(track_file, "{}", e.to_csv()?)?;
+        }
+
+        Ok(())
     }
 
     fn get_track_file_name(&self, date: NaiveDate) -> PathBuf {

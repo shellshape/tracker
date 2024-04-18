@@ -1,13 +1,16 @@
 use super::Command;
-use crate::store::Store;
+use crate::store::{Entry, Store};
 use anyhow::Result;
-use chrono::Local;
+use chrono::{Local, NaiveDateTime, NaiveTime};
 use clap::Args;
 use inquire::Confirm;
 
 #[derive(Args)]
 pub struct Add {
     message: Vec<String>,
+
+    #[arg(short, long)]
+    time: Option<String>,
 
     #[arg(short, long)]
     long: Option<String>,
@@ -19,15 +22,24 @@ impl Command for Add {
             anyhow::bail!("can not use empty message value")
         }
 
-        let timestamp = Local::now().naive_local();
+        let now = Local::now().naive_local();
+        let timestamp = match self.time {
+            Some(ref time) => {
+                NaiveDateTime::new(now.date(), NaiveTime::parse_from_str(time, "%H:%M")?)
+            }
+            None => now,
+        };
 
         let long = match self.long {
             Some(ref v) => Some(v.clone()),
             None => prompt_long()?,
         };
 
-        store.push_entry(timestamp, &self.message.join(" "), long.as_ref())?;
-        Ok(())
+        store.push_entry(Entry {
+            timestamp,
+            message: self.message.join(" "),
+            long,
+        })
     }
 }
 

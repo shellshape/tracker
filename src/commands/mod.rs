@@ -16,6 +16,7 @@ macro_rules! re_export {
 re_export! {
     add
     view
+    delete
 }
 
 pub trait Command {

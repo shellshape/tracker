@@ -1,6 +1,7 @@
 mod commands;
 mod config;
 mod store;
+mod util;
 
 use anyhow::Result;
 use clap::{command, Parser};
@@ -23,6 +24,7 @@ struct Cli {
 register_commands! {
     Add
     View
+    Delete
 }
 
 fn main() -> Result<()> {
