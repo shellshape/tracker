@@ -7,7 +7,11 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
+chrono = "0.4.38"
 clap = { version = "4", features = ["derive"] }
 dirs = "5"
+edit = "0.1.5"
 figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
+inquire = "0.7.4"
 serde = { version = "1", features = ["derive"] }
+yansi = "1.0.1"

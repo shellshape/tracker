@@ -1,5 +1,7 @@
 use anyhow::Result;
 
+use crate::store::Store;
+
 macro_rules! re_export {
     ( $( $md:tt )+ ) => {
         $(
@@ -12,11 +14,12 @@ macro_rules! re_export {
 // List the names of your command modules to re-export them
 // in this module.
 re_export! {
-    hello
+    add
+    view
 }
 
 pub trait Command {
-    fn run(&self) -> Result<()>;
+    fn run(&self, store: &Store) -> Result<()>;
 }
 
 #[macro_export]
