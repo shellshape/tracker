@@ -5,10 +5,13 @@ use chrono::Local;
 use clap::Args;
 use yansi::Paint;
 
+/// Display tracking list entries
 #[derive(Args)]
 pub struct View {
+    /// Date of the list
     date: Option<String>,
 
+    /// Display additional description
     #[arg(short, long)]
     long: bool,
 }

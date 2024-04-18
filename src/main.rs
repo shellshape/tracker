@@ -9,6 +9,7 @@ use commands::*;
 use config::Config;
 use store::Store;
 
+/// Simple tool to do time tracking
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
 struct Cli {

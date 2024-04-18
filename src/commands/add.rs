@@ -5,13 +5,17 @@ use chrono::{Local, NaiveDateTime, NaiveTime};
 use clap::Args;
 use inquire::Confirm;
 
+/// Add a track entry
 #[derive(Args)]
 pub struct Add {
+    /// A short message
     message: Vec<String>,
 
+    /// Time to set the entry at
     #[arg(short, long)]
     time: Option<String>,
 
+    /// Add a long description
     #[arg(short, long)]
     long: Option<String>,
 }

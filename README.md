@@ -1,12 +1,25 @@
 # tracker
 
-< insert description here >
+A simple tool to track time.
 
 ## Usage
 
 ```
 $ tracker --help
-< insert help here >
+Simple tool to do time tracking
+
+Usage: tracker.exe [OPTIONS] <COMMAND>
+
+Commands:
+  add     Add a track entry
+  view    Display tracking list entries
+  delete  Remove entries from a tracking list
+  help    Print this message or the help of the given subcommand(s)
+
+Options:
+  -c, --config <CONFIG>  Path to a config file
+  -h, --help             Print help
+  -V, --version          Print version
 ```
 
 ## Install

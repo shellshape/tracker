@@ -57,23 +57,19 @@ impl TryFrom<&str> for Entry {
 }
 
 impl Entry {
-    fn to_csv(&self) -> Result<String> {
-        use std::fmt::Write;
-
-        let mut res = String::new();
-
+    fn to_csv<W: Write>(&self, mut w: W) -> Result<()> {
         let long = match self.long {
             Some(ref v) => v.as_ref(),
             None => "",
         }
         .replace('"', "\\\"")
+        .replace("\r\n", "<NEWLINE>")
         .replace('\n', "<NEWLINE>");
 
         let msg = self.message.replace('"', "\\\"").replace('\n', "<NEWLINE>");
-        // TODO: This is ugly AF and should write directly into a stream
-        writeln!(res, r#""{}","{msg}","{long}""#, self.timestamp)?;
+        writeln!(w, r#""{}","{msg}","{long}""#, self.timestamp)?;
 
-        Ok(res)
+        Ok(())
     }
 }
 
@@ -87,9 +83,8 @@ impl Store {
     }
 
     pub fn push_entry(&self, entry: Entry) -> Result<()> {
-        let mut track_file = self.get_track_file(&entry.timestamp)?;
-        write!(track_file, "{}", entry.to_csv()?)?;
-
+        let track_file = self.get_track_file(&entry.timestamp)?;
+        entry.to_csv(track_file)?;
         Ok(())
     }
 
@@ -114,7 +109,7 @@ impl Store {
         let mut track_file = File::create(path)?;
 
         for e in entries {
-            write!(track_file, "{}", e.to_csv()?)?;
+            e.to_csv(&mut track_file)?
         }
 
         Ok(())

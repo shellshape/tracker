@@ -5,12 +5,11 @@ use chrono::Local;
 use clap::Args;
 use inquire::MultiSelect;
 
+/// Remove entries from a tracking list
 #[derive(Args)]
 pub struct Delete {
+    /// Date of the list
     date: Option<String>,
-
-    #[arg(short, long)]
-    long: bool,
 }
 
 impl Command for Delete {
