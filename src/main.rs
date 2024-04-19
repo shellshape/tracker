@@ -26,6 +26,7 @@ register_commands! {
     Add
     View
     Delete
+    Edit
 }
 
 fn main() -> Result<()> {

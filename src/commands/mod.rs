@@ -17,6 +17,7 @@ re_export! {
     add
     view
     delete
+    edit
 }
 
 pub trait Command {

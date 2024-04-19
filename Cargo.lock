@@ -402,6 +402,7 @@ dependencies = [
  "fxhash",
  "newline-converter",
  "once_cell",
+ "tempfile",
  "unicode-segmentation",
  "unicode-width",
 ]
@@ -813,7 +814,7 @@ dependencies = [
 
 [[package]]
 name = "tracker"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",

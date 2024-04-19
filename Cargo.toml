@@ -1,6 +1,6 @@
 [package]
 name = "tracker"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -12,6 +12,6 @@ clap = { version = "4", features = ["derive"] }
 dirs = "5"
 edit = "0.1.5"
 figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
-inquire = "0.7.4"
+inquire = { version = "0.7.4", features = ["editor"] }
 serde = { version = "1", features = ["derive"] }
 yansi = "1.0.1"
