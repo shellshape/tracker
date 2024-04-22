@@ -1,6 +1,7 @@
 use crate::store::Entry;
 use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
+use inquire::DateSelect;
 use std::fmt;
 use yansi::Paint;
 
@@ -55,4 +56,9 @@ pub fn parse_date(date: &str) -> Result<NaiveDate> {
     };
 
     Ok(NaiveDate::parse_from_str(&date, "%Y-%m-%d")?)
+}
+
+pub fn select_date() -> Result<NaiveDate> {
+    let date = DateSelect::new("Select Date").prompt()?;
+    Ok(date)
 }

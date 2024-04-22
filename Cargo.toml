@@ -12,6 +12,6 @@ clap = { version = "4", features = ["derive"] }
 dirs = "5"
 edit = "0.1.5"
 figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
-inquire = { version = "0.7.4", features = ["editor"] }
+inquire = { version = "0.7.4", features = ["date", "editor"] }
 serde = { version = "1", features = ["derive"] }
 yansi = "1.0.1"
