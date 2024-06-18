@@ -3,7 +3,6 @@ use crate::store::{Entry, Store};
 use anyhow::Result;
 use chrono::{Local, NaiveDateTime, NaiveTime};
 use clap::Args;
-use inquire::Confirm;
 
 /// Add a track entry
 #[derive(Args)]
