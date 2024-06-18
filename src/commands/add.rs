@@ -15,9 +15,13 @@ pub struct Add {
     #[arg(short, long)]
     time: Option<String>,
 
-    /// Add a long description
+    /// Add a long description by opening an editor
     #[arg(short, long)]
-    long: Option<String>,
+    long: bool,
+
+    /// Add a long description as text content
+    #[arg(long)]
+    long_text: Option<String>,
 }
 
 impl Command for Add {
@@ -34,9 +38,12 @@ impl Command for Add {
             None => now,
         };
 
-        let long = match self.long {
-            Some(ref v) => Some(v.clone()),
-            None => prompt_long()?,
+        let long = match self.long_text {
+            Some(ref txt) => Some(txt.clone()),
+            None => match self.long {
+                true => prompt_long()?,
+                false => None,
+            },
         };
 
         store.push_entry(Entry {
@@ -48,14 +55,6 @@ impl Command for Add {
 }
 
 fn prompt_long() -> Result<Option<String>> {
-    let ans = Confirm::new("Do you want to add a long description?")
-        .with_default(false)
-        .prompt()?;
-
-    if !ans {
-        return Ok(None);
-    }
-
     let long = edit::edit("")?.trim().to_string();
     Ok(match long.is_empty() {
         true => None,
