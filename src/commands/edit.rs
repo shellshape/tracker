@@ -1,7 +1,8 @@
 use super::Command;
 use crate::{
+    config::Config,
     store::{Entry, Store},
-    util::{parse_date, select_date},
+    util::{parse_date, select_date, FormatableEntry},
 };
 use anyhow::Result;
 use chrono::{Local, NaiveDateTime, NaiveTime};
@@ -24,7 +25,7 @@ pub struct Edit {
 }
 
 impl Command for Edit {
-    fn run(&self, store: &Store) -> Result<()> {
+    fn run(&self, store: &Store, config: &Config) -> Result<()> {
         let date = match self.date {
             Some(ref date_str) => parse_date(date_str)?,
             None if self.select => select_date()?,
@@ -43,7 +44,12 @@ impl Command for Edit {
                 .clone(),
             false => {
                 entries.sort_by_key(|e| e.timestamp);
-                Select::new("Select entry to edit", entries.clone()).prompt()?
+                let entries: Vec<_> = entries
+                    .clone()
+                    .into_iter()
+                    .map(|e| FormatableEntry::new(e, config, false))
+                    .collect();
+                Select::new("Select entry to edit", entries).prompt()?.entry
             }
         };
 

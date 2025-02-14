@@ -19,8 +19,27 @@ macro_rules! local_config_name {
     };
 }
 
+fn default_pause_regex() -> String {
+    "(?i)^pause$".to_string()
+}
+
+fn default_start_regex() -> String {
+    "(?i)^start$".to_string()
+}
+
+fn default_end_regex() -> String {
+    "(?i)^end$".to_string()
+}
+
 #[derive(Deserialize)]
-pub struct Config {}
+pub struct Config {
+    #[serde(default = "default_start_regex")]
+    pub start_regex: String,
+    #[serde(default = "default_pause_regex")]
+    pub pause_regex: String,
+    #[serde(default = "default_end_regex")]
+    pub end_regex: String,
+}
 
 impl Config {
     pub fn parse<T: AsRef<Path>>(dir: Option<T>) -> Result<Self> {

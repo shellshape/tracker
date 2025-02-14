@@ -32,7 +32,7 @@ register_commands! {
 fn main() -> Result<()> {
     let cli = Cli::parse();
 
-    let _ = Config::parse(cli.config)?;
+    let config = Config::parse(cli.config)?;
 
     let store = Store::new(
         dirs::home_dir()
@@ -40,7 +40,7 @@ fn main() -> Result<()> {
             .join("time_trackings"),
     )?;
 
-    cli.commands.run(&store)?;
+    cli.commands.run(&store, &config)?;
 
     Ok(())
 }

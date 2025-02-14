@@ -1,12 +1,16 @@
+use std::fmt;
+
 use super::Command;
 use crate::{
+    config::Config,
     store::Store,
     util::{parse_date, select_date},
 };
 use anyhow::Result;
 use chrono::Local;
 use clap::Args;
-use yansi::Paint;
+use regex::Regex;
+use yansi::{Paint, Style};
 
 /// Display tracking list entries
 #[derive(Args)]
@@ -24,7 +28,7 @@ pub struct View {
 }
 
 impl Command for View {
-    fn run(&self, store: &Store) -> Result<()> {
+    fn run(&self, store: &Store, config: &Config) -> Result<()> {
         let date = match self.date {
             Some(ref date_str) => parse_date(date_str)?,
             None if self.select => select_date()?,
@@ -41,12 +45,8 @@ impl Command for View {
                 format!("{:>2}", i + 1).cyan().dim(),
                 "]".dim(),
             );
-            if self.long {
-                print!("{e:#}");
-            } else {
-                print!("{e}");
-            }
-            println!();
+
+            println!("{}", e.formatted(config, self.long)?);
         }
 
         Ok(())

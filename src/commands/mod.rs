@@ -1,6 +1,6 @@
 use anyhow::Result;
 
-use crate::store::Store;
+use crate::{config::Config, store::Store};
 
 macro_rules! re_export {
     ( $( $md:tt )+ ) => {
@@ -21,7 +21,7 @@ re_export! {
 }
 
 pub trait Command {
-    fn run(&self, store: &Store) -> Result<()>;
+    fn run(&self, store: &Store, config: &Config) -> Result<()>;
 }
 
 #[macro_export]
