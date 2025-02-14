@@ -1,5 +1,3 @@
-use std::fmt;
-
 use super::Command;
 use crate::{
     config::Config,
@@ -7,10 +5,10 @@ use crate::{
     util::{parse_date, select_date},
 };
 use anyhow::Result;
-use chrono::Local;
+use chrono::{Duration, Local};
 use clap::Args;
-use regex::Regex;
-use yansi::{Paint, Style};
+use fancy_duration::AsFancyDuration;
+use yansi::Paint;
 
 /// Display tracking list entries
 #[derive(Args)]
@@ -38,7 +36,20 @@ impl Command for View {
         let mut entries = store.list(date)?;
         entries.sort_by_key(|e| e.timestamp);
 
+        let mut sum = Duration::zero();
+        let mut pause_time = Duration::zero();
+        let mut last_timestamp = None;
+
         for (i, e) in entries.iter().enumerate() {
+            if let Some(last_timestamp) = last_timestamp {
+                match e.message_matches(&config.pause_regex)? {
+                    true => pause_time += e.timestamp - last_timestamp,
+                    false => sum += e.timestamp - last_timestamp,
+                }
+            }
+
+            last_timestamp = Some(e.timestamp);
+
             print!(
                 "{}{}{} ",
                 "[".dim(),
@@ -48,6 +59,12 @@ impl Command for View {
 
             println!("{}", e.formatted(config, self.long)?);
         }
+
+        println!(
+            "\n     {} ({})",
+            sum.fancy_duration().truncate(2).to_string().cyan().bold(),
+            format!("{} pause", pause_time.fancy_duration().truncate(2)).green()
+        );
 
         Ok(())
     }

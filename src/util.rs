@@ -3,7 +3,7 @@ use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use inquire::DateSelect;
 use regex::Regex;
-use std::{fmt, io::Write};
+use std::fmt;
 use yansi::{Paint, Style};
 
 static STYLE_START: Style = Style::new().cyan();
@@ -28,7 +28,7 @@ impl Entry {
             "{} {} {}",
             self.timestamp_formatted().rgb(244, 9, 84),
             ":".dim(),
-            style_entry(&self.message, config)?
+            self.style_message(config)?
         )?;
         if let Some(ref long_message) = self.long {
             if long {
@@ -39,6 +39,22 @@ impl Entry {
         }
         Ok(())
     }
+
+    pub fn message_matches(&self, rx: &str) -> Result<bool> {
+        Ok(Regex::new(rx)?.is_match(&self.message))
+    }
+
+    fn style_message<'a>(&'a self, config: &Config) -> Result<Box<dyn fmt::Display + 'a>> {
+        Ok(if self.message_matches(&config.start_regex)? {
+            Box::new(self.message.paint(STYLE_START))
+        } else if self.message_matches(&config.pause_regex)? {
+            Box::new(self.message.paint(STYLE_PAUSE))
+        } else if self.message_matches(&config.end_regex)? {
+            Box::new(self.message.paint(STYLE_END))
+        } else {
+            Box::new(&self.message)
+        })
+    }
 }
 
 fn format_long(long: &str) -> String {
@@ -48,18 +64,6 @@ fn format_long(long: &str) -> String {
         str.push_str(line);
     }
     str
-}
-
-fn style_entry<'a>(v: &'a str, config: &Config) -> Result<Box<dyn fmt::Display + 'a>> {
-    Ok(if Regex::new(&config.start_regex)?.is_match(v) {
-        Box::new(v.paint(STYLE_START))
-    } else if Regex::new(&config.pause_regex)?.is_match(v) {
-        Box::new(v.paint(STYLE_PAUSE))
-    } else if Regex::new(&config.end_regex)?.is_match(v) {
-        Box::new(v.paint(STYLE_END))
-    } else {
-        Box::new(v)
-    })
 }
 
 pub fn parse_date(date: &str) -> Result<NaiveDate> {
@@ -106,7 +110,7 @@ impl<'a> FormatableEntry<'a> {
     }
 }
 
-impl<'a> fmt::Display for FormatableEntry<'a> {
+impl fmt::Display for FormatableEntry<'_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.entry
             .format(f, self.config, self.long)
