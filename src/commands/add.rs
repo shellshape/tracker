@@ -9,6 +9,7 @@ use clap::Args;
 
 /// Add a track entry
 #[derive(Args)]
+#[command(visible_aliases = ["a"])]
 pub struct Add {
     /// A short message
     message: Vec<String>,

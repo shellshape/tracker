@@ -12,6 +12,7 @@ use yansi::Paint;
 
 /// Display tracking list entries
 #[derive(Args)]
+#[command(visible_aliases = ["v"])]
 pub struct View {
     /// Date of the list
     date: Option<String>,

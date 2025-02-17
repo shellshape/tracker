@@ -11,6 +11,7 @@ use inquire::{CustomType, Editor, Select, Text};
 
 /// Edit an entry from a tracking list
 #[derive(Args)]
+#[command(visible_aliases = ["e"])]
 pub struct Edit {
     /// Date of the list
     date: Option<String>,

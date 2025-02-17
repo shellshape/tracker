@@ -11,6 +11,7 @@ use inquire::MultiSelect;
 
 /// Remove entries from a tracking list
 #[derive(Args)]
+#[command(visible_aliases = ["d"])]
 pub struct Delete {
     /// Date of the list
     date: Option<String>,
