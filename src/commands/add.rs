@@ -4,7 +4,7 @@ use crate::{
     store::{Entry, Store},
 };
 use anyhow::Result;
-use chrono::{Local, NaiveDateTime, NaiveTime};
+use chrono::{DurationRound, Local, NaiveDateTime, NaiveTime};
 use clap::Args;
 
 /// Add a track entry
@@ -27,7 +27,7 @@ pub struct Add {
 }
 
 impl Command for Add {
-    fn run(&self, store: &Store, _: &Config) -> Result<()> {
+    fn run(&self, store: &Store, config: &Config) -> Result<()> {
         if self.message.is_empty() {
             anyhow::bail!("can not use empty message value")
         }
@@ -46,6 +46,11 @@ impl Command for Add {
                 true => prompt_long()?,
                 false => None,
             },
+        };
+
+        let timestamp = match config.round_steps {
+            Some(ref round) => timestamp.duration_round(round.duration())?,
+            None => timestamp,
         };
 
         store.push_entry(Entry {

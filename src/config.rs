@@ -1,11 +1,11 @@
-use std::{ops::Deref, path::Path};
-
 use anyhow::Result;
+use fancy_duration::FancyDuration;
 use figment::{
     providers::{Format, Json, Toml, Yaml},
     Figment,
 };
 use serde::Deserialize;
+use std::{ops::Deref, path::Path};
 
 macro_rules! package_name {
     () => {
@@ -35,10 +35,14 @@ fn default_end_regex() -> String {
 pub struct Config {
     #[serde(default = "default_start_regex")]
     pub start_regex: String,
+
     #[serde(default = "default_pause_regex")]
     pub pause_regex: String,
+
     #[serde(default = "default_end_regex")]
     pub end_regex: String,
+
+    pub round_steps: Option<FancyDuration<chrono::Duration>>,
 }
 
 impl Config {

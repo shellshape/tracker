@@ -299,6 +299,8 @@ dependencies = [
  "chrono",
  "lazy_static",
  "regex",
+ "serde",
+ "serde_derive",
 ]
 
 [[package]]
