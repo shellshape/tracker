@@ -35,6 +35,12 @@ impl Command for View {
         };
 
         let mut entries = store.list(date)?;
+
+        if entries.is_empty() {
+            println!("{}", "There are no entries for this day.".italic().dim());
+            return Ok(());
+        }
+
         entries.sort_by_key(|e| e.timestamp);
 
         let mut sum = Duration::zero();

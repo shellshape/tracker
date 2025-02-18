@@ -8,6 +8,7 @@ use anyhow::Result;
 use chrono::Local;
 use clap::Args;
 use inquire::MultiSelect;
+use yansi::Paint;
 
 /// Remove entries from a tracking list
 #[derive(Args)]
@@ -30,6 +31,12 @@ impl Command for Delete {
         };
 
         let mut entries = store.list(date)?;
+
+        if entries.is_empty() {
+            println!("{}", "There are no entries for this day.".italic().dim());
+            return Ok(());
+        }
+
         entries.sort_by_key(|e| e.timestamp);
 
         let select_entries: Vec<_> = entries

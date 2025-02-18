@@ -8,6 +8,7 @@ use anyhow::Result;
 use chrono::{Local, NaiveDateTime, NaiveTime};
 use clap::Args;
 use inquire::{CustomType, Editor, Select, Text};
+use yansi::Paint;
 
 /// Edit an entry from a tracking list
 #[derive(Args)]
@@ -34,6 +35,12 @@ impl Command for Edit {
         };
 
         let mut entries = store.list(date)?;
+
+        if entries.is_empty() {
+            println!("{}", "There are no entries for this day.".italic().dim());
+            return Ok(());
+        }
+
         if entries.is_empty() {
             anyhow::bail!("There are no entreis for the given date.")
         }
