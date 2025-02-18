@@ -30,3 +30,15 @@ You can either download the latest release builds form the [Releases page](https
 ```
 cargo install --git https://github.com/shellshape/tracker
 ```
+
+## Config
+
+You can configure this tool via a config file either located in the current working directory named `tracker.toml` or in your [configuration directory](https://docs.rs/dirs/latest/dirs/fn.config_dir.html) in the directory `tracker/config.toml`. Instead of TOML, you can also write the config in YAML or JSON format.
+
+| Key           | Default                | Description                                                 |
+| ------------- | ---------------------- | ----------------------------------------------------------- |
+| `storage_dir` | `$HOME/time_trackings` | Location where time tracking logs are stored and read from. |
+| `round_steps` |                        | Duration to round the recorded time stamps on.              |
+| `start_regex` | `(?i)^start$`          | Regular expression to identify start event from message.    |
+| `pause_regex` | `(?i)^pause$`          | Regular expression to identify pause event from message.    |
+| `end_regex`   | `(?i)^end$`            | Regular expression to identify end event from message.      |
