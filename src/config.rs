@@ -5,7 +5,10 @@ use figment::{
     Figment,
 };
 use serde::Deserialize;
-use std::{ops::Deref, path::Path};
+use std::{
+    ops::Deref,
+    path::{Path, PathBuf},
+};
 
 macro_rules! package_name {
     () => {
@@ -31,8 +34,17 @@ fn default_end_regex() -> String {
     "(?i)^end$".to_string()
 }
 
+fn default_storage_dir() -> PathBuf {
+    dirs::home_dir()
+        .expect("home directory")
+        .join("time_trackings")
+}
+
 #[derive(Deserialize)]
 pub struct Config {
+    #[serde(default = "default_storage_dir")]
+    pub storage_dir: PathBuf,
+
     #[serde(default = "default_start_regex")]
     pub start_regex: String,
 

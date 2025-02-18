@@ -34,11 +34,7 @@ fn main() -> Result<()> {
 
     let config = Config::parse(cli.config)?;
 
-    let store = Store::new(
-        dirs::home_dir()
-            .ok_or_else(|| anyhow::anyhow!("could not find home directory"))?
-            .join("time_trackings"),
-    )?;
+    let store = Store::new(&config.storage_dir)?;
 
     cli.commands.run(&store, &config)?;
 
