@@ -8,6 +8,7 @@ use anyhow::Result;
 use chrono::{Duration, Local};
 use clap::Args;
 use fancy_duration::AsFancyDuration;
+use std::io;
 use yansi::Paint;
 
 /// Display tracking list entries
@@ -24,6 +25,10 @@ pub struct View {
     /// Display additional description
     #[arg(short, long)]
     long: bool,
+
+    /// Output entries as CSV
+    #[arg(long)]
+    csv: bool,
 }
 
 impl Command for View {
@@ -35,13 +40,19 @@ impl Command for View {
         };
 
         let mut entries = store.list(date)?;
+        entries.sort_by_key(|e| e.timestamp);
+
+        if self.csv {
+            for e in entries {
+                e.to_csv(io::stdout())?;
+            }
+            return Ok(());
+        }
 
         if entries.is_empty() {
             println!("{}", "There are no entries for this day.".italic().dim());
             return Ok(());
         }
-
-        entries.sort_by_key(|e| e.timestamp);
 
         let mut sum = Duration::zero();
         let mut pause_time = Duration::zero();

@@ -4,6 +4,7 @@ use std::{
     fs::{self, File},
     io::{Read, Write},
     path::PathBuf,
+    str::FromStr,
 };
 
 pub struct Store {
@@ -17,10 +18,10 @@ pub struct Entry {
     pub long: Option<String>,
 }
 
-impl TryFrom<&str> for Entry {
-    type Error = anyhow::Error;
+impl FromStr for Entry {
+    type Err = anyhow::Error;
 
-    fn try_from(value: &str) -> std::prelude::v1::Result<Self, Self::Error> {
+    fn from_str(value: &str) -> std::prelude::v1::Result<Self, Self::Err> {
         if value.is_empty() {
             anyhow::bail!("empty value")
         }
@@ -57,7 +58,7 @@ impl TryFrom<&str> for Entry {
 }
 
 impl Entry {
-    fn to_csv<W: Write>(&self, mut w: W) -> Result<()> {
+    pub fn to_csv<W: Write>(&self, mut w: W) -> Result<()> {
         let long = match self.long {
             Some(ref v) => v.as_ref(),
             None => "",
@@ -100,7 +101,7 @@ impl Store {
 
         buf.split('\n')
             .filter(|l| !l.is_empty())
-            .map(|line| line.try_into())
+            .map(|line| line.parse())
             .collect()
     }
 
