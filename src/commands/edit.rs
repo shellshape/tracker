@@ -2,7 +2,7 @@ use super::Command;
 use crate::{
     config::Config,
     store::{Entry, Store},
-    util::{parse_date, select_date, FormatableEntry},
+    util::{FormatableEntry, parse_date, select_date},
 };
 use anyhow::Result;
 use chrono::{Local, NaiveDateTime, NaiveTime};
@@ -65,14 +65,14 @@ impl Command for Edit {
             .with_parser(&parse_time)
             .with_formatter(&format_time)
             .with_default_value_formatter(&format_time)
-            .with_default(selected.timestamp.time())
+            .with_starting_input(&format_time(selected.timestamp.time()))
             .with_error_message("Invalid value. Must be time i nformat %H:%M")
             .prompt()?;
 
         let timestamp = NaiveDateTime::new(selected.timestamp.date(), time);
 
         let message = Text::new("Message")
-            .with_default(&selected.message)
+            .with_initial_value(&selected.message)
             .prompt()?;
 
         let long = Editor::new("Long")
