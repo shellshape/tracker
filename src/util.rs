@@ -2,6 +2,7 @@ use crate::config::Config;
 use crate::store::Entry;
 use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
+use fancy_duration::{AsFancyDuration, AsTimes};
 use inquire::DateSelect;
 use regex::Regex;
 use std::fmt;
@@ -17,13 +18,32 @@ impl Entry {
         time.format("%H:%M").to_string()
     }
 
-    pub fn formatted(&self, config: &Config, long: bool) -> Result<String> {
+    pub fn formatted<D, T>(
+        &self,
+        config: &Config,
+        long: bool,
+        duration: Option<D>,
+    ) -> Result<String>
+    where
+        D: AsFancyDuration<T>,
+        T: AsTimes + Clone,
+    {
         let mut res = String::new();
-        self.format(&mut res, config, long)?;
+        self.format(&mut res, config, long, duration)?;
         Ok(res)
     }
 
-    pub fn format(&self, mut f: impl fmt::Write, config: &Config, long: bool) -> Result<()> {
+    pub fn format<D, T>(
+        &self,
+        mut f: impl fmt::Write,
+        config: &Config,
+        long: bool,
+        duration: Option<D>,
+    ) -> Result<()>
+    where
+        D: AsFancyDuration<T>,
+        T: AsTimes + Clone,
+    {
         write!(
             f,
             "{} {} {}",
@@ -31,13 +51,27 @@ impl Entry {
             ":".dim(),
             self.style_message(config)?
         )?;
-        if let Some(ref long_message) = self.long {
-            if long {
+
+        if !long && self.long.is_some() {
+            write!(f, " {}", "[...]".dim().italic())?;
+        }
+
+        if let Some(duration) = duration {
+            write!(
+                f,
+                " {}{}{}",
+                '('.dim(),
+                duration.fancy_duration().truncate(2).dim(),
+                ')'.dim()
+            )?;
+        }
+
+        if long {
+            if let Some(ref long_message) = self.long {
                 write!(f, " {}", format_long(long_message).italic())?;
-            } else {
-                write!(f, " {}", "[...]".dim().italic())?;
             }
         }
+
         Ok(())
     }
 
@@ -95,14 +129,14 @@ pub fn select_date() -> Result<NaiveDate> {
     Ok(date)
 }
 
-pub struct FormatableEntry<'a> {
-    pub config: &'a Config,
+pub struct FormatableEntry<'c, 'e> {
+    pub config: &'c Config,
     pub long: bool,
-    pub entry: Entry,
+    pub entry: &'e Entry,
 }
 
-impl<'a> FormatableEntry<'a> {
-    pub fn new(entry: Entry, config: &'a Config, long: bool) -> Self {
+impl<'c, 'e> FormatableEntry<'c, 'e> {
+    pub fn new(entry: &'e Entry, config: &'c Config, long: bool) -> Self {
         Self {
             entry,
             config,
@@ -111,10 +145,10 @@ impl<'a> FormatableEntry<'a> {
     }
 }
 
-impl fmt::Display for FormatableEntry<'_> {
+impl<'c, 'e> fmt::Display for FormatableEntry<'c, 'e> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.entry
-            .format(f, self.config, self.long)
+            .format(f, self.config, self.long, None::<chrono::TimeDelta>)
             .map_err(|_| fmt::Error)
     }
 }

@@ -46,13 +46,11 @@ impl Command for Edit {
         let selected = match self.last {
             true => entries
                 .last()
-                .ok_or_else(|| anyhow::anyhow!("no entries found"))?
-                .clone(),
+                .ok_or_else(|| anyhow::anyhow!("no entries found"))?,
             false => {
                 entries.sort_by_key(|e| e.timestamp);
                 let entries: Vec<_> = entries
-                    .clone()
-                    .into_iter()
+                    .iter()
                     .map(|e| FormatableEntry::new(e, config, false))
                     .collect();
                 Select::new("Select entry to edit", entries).prompt()?.entry
@@ -91,7 +89,7 @@ impl Command for Edit {
 
         let new = entries
             .iter()
-            .map(|e| if e == &selected { new.clone() } else { e.clone() })
+            .map(|e| if e == selected { new.clone() } else { e.clone() })
             .collect();
 
         store.set(selected.timestamp.date(), new)

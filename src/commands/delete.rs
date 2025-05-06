@@ -38,8 +38,7 @@ impl Command for Delete {
         entries.sort_by_key(|e| e.timestamp);
 
         let select_entries: Vec<_> = entries
-            .clone()
-            .into_iter()
+            .iter()
             .map(|e| FormatableEntry::new(e, config, false))
             .collect();
 
@@ -51,7 +50,7 @@ impl Command for Delete {
 
         let new = entries
             .iter()
-            .filter(|&e| !selected.contains(e))
+            .filter(|&e| !selected.contains(&e))
             .cloned()
             .collect();
 

@@ -57,12 +57,17 @@ impl Command for View {
         let mut last_timestamp = None;
 
         for (i, e) in entries.iter().enumerate() {
-            if let Some(last_timestamp) = last_timestamp {
-                match e.message_matches(&config.pause_regex)? {
-                    true => pause_time += e.timestamp - last_timestamp,
-                    false => sum += e.timestamp - last_timestamp,
+            let duration = match last_timestamp {
+                Some(last_timestamp) => {
+                    let duration = e.timestamp - last_timestamp;
+                    match e.message_matches(&config.pause_regex)? {
+                        true => pause_time += duration,
+                        false => sum += duration,
+                    }
+                    Some(duration)
                 }
-            }
+                None => None,
+            };
 
             last_timestamp = Some(e.timestamp);
 
@@ -73,7 +78,7 @@ impl Command for View {
                 "]".dim(),
             );
 
-            println!("{}", e.formatted(config, self.long)?);
+            println!("{}", e.formatted(config, self.long, duration)?);
         }
 
         println!(
