@@ -1,6 +1,6 @@
+use crate::config::Config;
+use crate::store::Store;
 use anyhow::Result;
-
-use crate::{config::Config, store::Store};
 
 macro_rules! re_export {
     ( $( $md:tt )+ ) => {

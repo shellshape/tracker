@@ -1,4 +1,5 @@
-use crate::{config::Config, store::Entry};
+use crate::config::Config;
+use crate::store::Entry;
 use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use inquire::DateSelect;

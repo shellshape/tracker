@@ -1,14 +1,10 @@
 use anyhow::Result;
 use fancy_duration::FancyDuration;
-use figment::{
-    providers::{Format, Json, Toml, Yaml},
-    Figment,
-};
+use figment::Figment;
+use figment::providers::{Format, Json, Toml, Yaml};
 use serde::Deserialize;
-use std::{
-    ops::Deref,
-    path::{Path, PathBuf},
-};
+use std::ops::Deref;
+use std::path::{Path, PathBuf};
 
 macro_rules! package_name {
     () => {

@@ -1,9 +1,7 @@
 use super::Command;
-use crate::{
-    config::Config,
-    store::Store,
-    util::{parse_date, select_date},
-};
+use crate::config::Config;
+use crate::store::Store;
+use crate::util::{parse_date, select_date};
 use anyhow::Result;
 use chrono::{Duration, Local};
 use clap::Args;

@@ -1,11 +1,9 @@
 use anyhow::Result;
 use chrono::{NaiveDate, NaiveDateTime};
-use std::{
-    fs::{self, File},
-    io::{Read, Write},
-    path::PathBuf,
-    str::FromStr,
-};
+use std::fs::{self, File};
+use std::io::{Read, Write};
+use std::path::PathBuf;
+use std::str::FromStr;
 
 pub struct Store {
     base_dir: PathBuf,
@@ -21,12 +19,12 @@ pub struct Entry {
 impl FromStr for Entry {
     type Err = anyhow::Error;
 
-    fn from_str(value: &str) -> std::prelude::v1::Result<Self, Self::Err> {
-        if value.is_empty() {
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        if s.is_empty() {
             anyhow::bail!("empty value")
         }
 
-        let vals = value[1..value.len() - 1].replace("<NEWLINE>", "\n");
+        let vals = s[1..s.len() - 1].replace("<NEWLINE>", "\n");
         let mut split = vals.split("\",\"");
 
         let timestamp_str = split
@@ -41,13 +39,10 @@ impl FromStr for Entry {
             .ok_or_else(|| anyhow::anyhow!("no message value"))?
             .replace("\\\"", "\"");
 
-        let long = split.next().map(|v| v.replace("\\\"", "\"")).and_then(|v| {
-            if v.is_empty() {
-                None
-            } else {
-                Some(v)
-            }
-        });
+        let long = split
+            .next()
+            .map(|v| v.replace("\\\"", "\""))
+            .and_then(|v| if v.is_empty() { None } else { Some(v) });
 
         Ok(Self {
             timestamp,

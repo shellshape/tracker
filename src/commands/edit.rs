@@ -1,9 +1,7 @@
 use super::Command;
-use crate::{
-    config::Config,
-    store::{Entry, Store},
-    util::{FormatableEntry, parse_date, select_date},
-};
+use crate::config::Config;
+use crate::store::{Entry, Store};
+use crate::util::{FormatableEntry, parse_date, select_date};
 use anyhow::Result;
 use chrono::{Local, NaiveDateTime, NaiveTime};
 use clap::Args;
@@ -93,13 +91,7 @@ impl Command for Edit {
 
         let new = entries
             .iter()
-            .map(|e| {
-                if e == &selected {
-                    new.clone()
-                } else {
-                    e.clone()
-                }
-            })
+            .map(|e| if e == &selected { new.clone() } else { e.clone() })
             .collect();
 
         store.set(selected.timestamp.date(), new)
