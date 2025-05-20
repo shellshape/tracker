@@ -145,7 +145,7 @@ impl<'c, 'e> FormatableEntry<'c, 'e> {
     }
 }
 
-impl<'c, 'e> fmt::Display for FormatableEntry<'c, 'e> {
+impl fmt::Display for FormatableEntry<'_, '_> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.entry
             .format(f, self.config, self.long, None::<chrono::TimeDelta>)
