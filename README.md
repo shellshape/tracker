@@ -2,6 +2,8 @@
 
 A simple tool to track time.
 
+![](.github/media/demo.gif)
+
 ## Usage
 
 ```
