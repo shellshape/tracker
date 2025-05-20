@@ -44,5 +44,5 @@ You can configure this tool via a config file either located in the current work
 | `storage_dir` | `$HOME/time_trackings` | Location where time tracking logs are stored and read from. |
 | `round_steps` |                        | Duration to round the recorded time stamps on.              |
 | `start_regex` | `(?i)^start$`          | Regular expression to identify start event from message.    |
-| `pause_regex` | `(?i)^pause$`          | Regular expression to identify pause event from message.    |
+| `break_regex` | `(?i)^break$`          | Regular expression to identify break event from message.    |
 | `end_regex`   | `(?i)^end$`            | Regular expression to identify end event from message.      |
