@@ -18,8 +18,8 @@ macro_rules! local_config_name {
     };
 }
 
-fn default_pause_regex() -> String {
-    "(?i)^pause$".to_string()
+fn default_break_regex() -> String {
+    "(?i)^(?:break|pause)$".to_string()
 }
 
 fn default_start_regex() -> String {
@@ -44,8 +44,9 @@ pub struct Config {
     #[serde(default = "default_start_regex")]
     pub start_regex: String,
 
-    #[serde(default = "default_pause_regex")]
-    pub pause_regex: String,
+    #[serde(default = "default_break_regex")]
+    #[serde(alias = "pause_regex")] // backwards compat
+    pub break_regex: String,
 
     #[serde(default = "default_end_regex")]
     pub end_regex: String,
@@ -82,7 +83,7 @@ impl Config {
             "yml" | "yaml" => figment.merge(Yaml::file(path)),
             "toml" => figment.merge(Toml::file(path)),
             "json" => figment.merge(Json::file(path)),
-            _ => anyhow::bail!("invalid config file type"),
+            _ => return Err(anyhow::anyhow!("invalid config file type")),
         };
 
         Ok(figment.extract()?)

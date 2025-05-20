@@ -21,7 +21,6 @@ struct Cli {
     commands: Commands,
 }
 
-// List the names of your sub commands here.
 register_commands! {
     Add
     View
@@ -38,12 +37,8 @@ fn main() {
 #[cfg(not(feature = "clap-markdown"))]
 fn main() -> Result<()> {
     let cli = Cli::parse();
-
     let config = Config::parse(cli.config)?;
-
     let store = Store::new(&config.storage_dir)?;
 
-    cli.commands.run(&store, &config)?;
-
-    Ok(())
+    cli.commands.run(&store, &config)
 }

@@ -60,7 +60,7 @@ impl Command for View {
             let duration = match last_timestamp {
                 Some(last_timestamp) => {
                     let duration = e.timestamp - last_timestamp;
-                    match e.message_matches(&config.pause_regex)? {
+                    match e.message_matches(&config.break_regex)? {
                         true => pause_time += duration,
                         false => sum += duration,
                     }

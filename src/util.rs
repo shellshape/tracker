@@ -82,7 +82,7 @@ impl Entry {
     fn style_message<'a>(&'a self, config: &Config) -> Result<Box<dyn fmt::Display + 'a>> {
         Ok(if self.message_matches(&config.start_regex)? {
             Box::new(self.message.paint(STYLE_START))
-        } else if self.message_matches(&config.pause_regex)? {
+        } else if self.message_matches(&config.break_regex)? {
             Box::new(self.message.paint(STYLE_PAUSE))
         } else if self.message_matches(&config.end_regex)? {
             Box::new(self.message.paint(STYLE_END))
@@ -118,7 +118,7 @@ pub fn parse_date(date: &str) -> Result<NaiveDate> {
         0 => format!("{year}-{month}-{date}"),
         1 => format!("{year}-{date}"),
         2 => date.to_string(),
-        _ => anyhow::bail!("invalid date format"),
+        _ => return Err(anyhow::anyhow!("invalid date format")),
     };
 
     Ok(NaiveDate::parse_from_str(&date, "%Y-%m-%d")?)

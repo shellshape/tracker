@@ -19,9 +19,9 @@ pub struct Entry {
 impl FromStr for Entry {
     type Err = anyhow::Error;
 
-    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+    fn from_str(s: &str) -> Result<Self> {
         if s.is_empty() {
-            anyhow::bail!("empty value")
+            return Err(anyhow::anyhow!("empty value"));
         }
 
         let vals = s[1..s.len() - 1].replace("<NEWLINE>", "\n");
@@ -72,9 +72,7 @@ impl Entry {
 impl Store {
     pub fn new<P: Into<PathBuf>>(base_dir: P) -> Result<Self> {
         let base_dir = base_dir.into();
-
         fs::create_dir_all(&base_dir)?;
-
         Ok(Self { base_dir })
     }
 

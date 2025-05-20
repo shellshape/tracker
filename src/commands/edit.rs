@@ -40,7 +40,7 @@ impl Command for Edit {
         }
 
         if entries.is_empty() {
-            anyhow::bail!("There are no entreis for the given date.")
+            return Err(anyhow::anyhow!("There are no entreis for the given date."));
         }
 
         let selected = match self.last {

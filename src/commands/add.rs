@@ -1,8 +1,6 @@
 use super::Command;
-use crate::{
-    config::Config,
-    store::{Entry, Store},
-};
+use crate::config::Config;
+use crate::store::{Entry, Store};
 use anyhow::Result;
 use chrono::{DurationRound, Local, NaiveDateTime, NaiveTime};
 use clap::Args;
@@ -30,7 +28,7 @@ pub struct Add {
 impl Command for Add {
     fn run(&self, store: &Store, config: &Config) -> Result<()> {
         if self.message.is_empty() {
-            anyhow::bail!("can not use empty message value")
+            return Err(anyhow::anyhow!("can not use empty message value"));
         }
 
         let now = Local::now().naive_local();
