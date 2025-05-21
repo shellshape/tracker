@@ -18,3 +18,10 @@ regex = "1.11.1"
 serde = { version = "1", features = ["derive"] }
 yansi = "1.0.1"
 clap-markdown = { version = "0.1.5", optional = true }
+
+[profile.release]
+strip = true
+opt-level = "s"
+codegen-units = 1
+lto = true
+panic = "unwind"
