@@ -1,19 +1,19 @@
 [package]
 name = "tracker"
-version = "0.7.0"
+version = "0.8.0"
 edition = "2024"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 anyhow = "1"
-chrono = "0.4.38"
+chrono = "0.4.41"
 clap = { version = "4", features = ["derive"] }
 dirs = "5"
 edit = "0.1.5"
 fancy-duration = { version = "0.9.2", features = ["chrono", "serde"] }
 figment = { version = "0.10", features = ["json", "yaml", "toml", "env"] }
-inquire = { version = "0.7.4", features = ["date", "editor"] }
+inquire = { version = "0.7.5", features = ["date", "editor"] }
 regex = "1.11.1"
 serde = { version = "1", features = ["derive"] }
 yansi = "1.0.1"
