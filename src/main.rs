@@ -1,13 +1,14 @@
-mod commands;
-mod config;
-mod store;
-mod util;
-
 use anyhow::Result;
 use clap::{Parser, command};
 use commands::*;
 use config::Config;
 use store::Store;
+
+mod commands;
+mod config;
+mod migrations;
+mod store;
+mod util;
 
 /// Simple tool to do time tracking
 #[derive(Parser)]
@@ -38,6 +39,9 @@ fn main() {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     let config = Config::parse(cli.config)?;
+
+    migrations::migrate()?;
+
     let store = Store::new(&config.storage_dir)?;
 
     cli.commands.run(&store, &config)
