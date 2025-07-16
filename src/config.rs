@@ -30,9 +30,9 @@ fn default_end_regex() -> String {
     "(?i)^end$".to_string()
 }
 
-fn default_storage_dir() -> PathBuf {
-    dirs::home_dir()
-        .expect("home directory")
+pub fn default_storage_dir() -> PathBuf {
+    dirs::data_dir()
+        .expect("data directory")
         .join("time_trackings")
 }
 
