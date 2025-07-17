@@ -41,7 +41,7 @@ You can configure this tool via a config file either located in the current work
 
 | Key           | Default                | Description                                                 |
 | ------------- | ---------------------- | ----------------------------------------------------------- |
-| `storage_dir` | `$HOME/time_trackings` | Location where time tracking logs are stored and read from. |
+| `storage_dir` | `$HOME/.local/share/time_trackings` or `$XDG_DATA_HOME/time_trackings` | Location where time tracking logs are stored and read from. |
 | `round_steps` |                        | Duration to round the recorded time stamps on.              |
 | `start_regex` | `(?i)^start$`          | Regular expression to identify start event from message.    |
 | `break_regex` | `(?i)^break$`          | Regular expression to identify break event from message.    |
