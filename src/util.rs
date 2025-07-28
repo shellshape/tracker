@@ -6,6 +6,7 @@ use fancy_duration::{AsFancyDuration, AsTimes};
 use inquire::DateSelect;
 use regex::Regex;
 use std::fmt;
+use std::str::FromStr;
 use yansi::{Paint, Style};
 
 static STYLE_START: Style = Style::new().cyan();
@@ -101,27 +102,34 @@ fn format_long(long: &str) -> String {
     str
 }
 
-pub fn parse_date(date: &str) -> Result<NaiveDate> {
-    let today = Local::now().date_naive();
+#[derive(Clone)]
+pub struct Parsable<T: Clone>(pub T);
 
-    if let Some(days_str) = date.strip_prefix('-') {
-        let days = days_str.parse()?;
-        return Ok(today - Duration::days(days));
+impl FromStr for Parsable<NaiveDate> {
+    type Err = anyhow::Error;
+
+    fn from_str(date: &str) -> std::result::Result<Self, Self::Err> {
+        let today = Local::now().date_naive();
+
+        if let Some(days_str) = date.strip_prefix('-') {
+            let days = days_str.parse()?;
+            return Ok(Self(today - Duration::days(days)));
+        }
+
+        let delims = date.chars().filter(|&c| c == '-').count();
+
+        let year = today.year();
+        let month = today.month0() + 1;
+
+        let date = match delims {
+            0 => format!("{year}-{month}-{date}"),
+            1 => format!("{year}-{date}"),
+            2 => date.to_string(),
+            _ => return Err(anyhow::anyhow!("invalid date format")),
+        };
+
+        Ok(Self(NaiveDate::parse_from_str(&date, "%Y-%m-%d")?))
     }
-
-    let delims = date.chars().filter(|&c| c == '-').count();
-
-    let year = today.year();
-    let month = today.month0() + 1;
-
-    let date = match delims {
-        0 => format!("{year}-{month}-{date}"),
-        1 => format!("{year}-{date}"),
-        2 => date.to_string(),
-        _ => return Err(anyhow::anyhow!("invalid date format")),
-    };
-
-    Ok(NaiveDate::parse_from_str(&date, "%Y-%m-%d")?)
 }
 
 pub fn select_date() -> Result<NaiveDate> {

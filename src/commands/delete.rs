@@ -1,9 +1,9 @@
 use super::Command;
 use crate::config::Config;
 use crate::store::Store;
-use crate::util::{FormatableEntry, parse_date, select_date};
+use crate::util::{FormatableEntry, Parsable, select_date};
 use anyhow::Result;
-use chrono::Local;
+use chrono::{Local, NaiveDate};
 use clap::Args;
 use inquire::MultiSelect;
 use yansi::Paint;
@@ -13,7 +13,7 @@ use yansi::Paint;
 #[command(visible_aliases = ["d"])]
 pub struct Delete {
     /// Date of the list
-    date: Option<String>,
+    date: Option<Parsable<NaiveDate>>,
 
     /// Select date from an interactive calender
     #[arg(short, long)]
@@ -23,7 +23,7 @@ pub struct Delete {
 impl Command for Delete {
     fn run(&self, store: &Store, config: &Config) -> Result<()> {
         let date = match self.date {
-            Some(ref date_str) => parse_date(date_str)?,
+            Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
             _ => Local::now().date_naive(),
         };

@@ -1,9 +1,9 @@
 use super::Command;
 use crate::config::Config;
 use crate::store::{Entry, Store};
-use crate::util::{FormatableEntry, parse_date, select_date};
+use crate::util::{FormatableEntry, Parsable, select_date};
 use anyhow::Result;
-use chrono::{Local, NaiveDateTime, NaiveTime};
+use chrono::{Local, NaiveDate, NaiveDateTime, NaiveTime};
 use clap::Args;
 use inquire::{CustomType, Editor, Select, Text};
 use yansi::Paint;
@@ -13,7 +13,7 @@ use yansi::Paint;
 #[command(visible_aliases = ["e"])]
 pub struct Edit {
     /// Date of the list
-    date: Option<String>,
+    date: Option<Parsable<NaiveDate>>,
 
     /// Select date from an interactive calender
     #[arg(short, long)]
@@ -27,7 +27,7 @@ pub struct Edit {
 impl Command for Edit {
     fn run(&self, store: &Store, config: &Config) -> Result<()> {
         let date = match self.date {
-            Some(ref date_str) => parse_date(date_str)?,
+            Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
             _ => Local::now().date_naive(),
         };

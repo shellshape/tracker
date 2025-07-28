@@ -1,9 +1,9 @@
 use super::Command;
 use crate::config::Config;
 use crate::store::Store;
-use crate::util::{parse_date, select_date};
+use crate::util::{Parsable, select_date};
 use anyhow::Result;
-use chrono::{Duration, Local};
+use chrono::{Duration, Local, NaiveDate};
 use clap::Args;
 use fancy_duration::AsFancyDuration;
 use std::io;
@@ -14,7 +14,7 @@ use yansi::Paint;
 #[command(visible_aliases = ["v"])]
 pub struct View {
     /// Date of the list
-    date: Option<String>,
+    date: Option<Parsable<NaiveDate>>,
 
     /// Select date from an interactive calender
     #[arg(short, long)]
@@ -32,7 +32,7 @@ pub struct View {
 impl Command for View {
     fn run(&self, store: &Store, config: &Config) -> Result<()> {
         let date = match self.date {
-            Some(ref date_str) => parse_date(date_str)?,
+            Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
             _ => Local::now().date_naive(),
         };
