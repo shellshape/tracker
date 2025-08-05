@@ -1,8 +1,9 @@
 use super::Command;
 use crate::config::Config;
 use crate::store::{Entry, Store};
+use crate::util::{Parsable, select_date};
 use anyhow::Result;
-use chrono::{DurationRound, Local, NaiveDateTime, NaiveTime};
+use chrono::{DurationRound, Local, NaiveDate, NaiveDateTime, NaiveTime};
 use clap::Args;
 
 /// Swaps the next entry with the given timestamp and sets the next
@@ -16,6 +17,14 @@ pub struct Insert {
     /// Time to set the entry at
     #[arg(short, long)]
     time: Option<String>,
+
+    /// Date to set the entry at
+    #[arg(short, long)]
+    date: Option<Parsable<NaiveDate>>,
+
+    /// Select date from an interactive calender to set entry at
+    #[arg(short, long)]
+    select: bool,
 
     /// Add a long description by opening an editor
     #[arg(short, long)]
@@ -32,11 +41,15 @@ impl Command for Insert {
             return Err(anyhow::anyhow!("can not use empty message value"));
         }
 
+        let date = match self.date {
+            Some(Parsable(date_str)) => date_str,
+            None if self.select => select_date()?,
+            _ => Local::now().date_naive(),
+        };
+
         let now = Local::now().naive_local();
         let timestamp = match self.time {
-            Some(ref time) => {
-                NaiveDateTime::new(now.date(), NaiveTime::parse_from_str(time, "%H:%M")?)
-            }
+            Some(ref time) => NaiveDateTime::new(date, NaiveTime::parse_from_str(time, "%H:%M")?),
             None => now,
         };
 
