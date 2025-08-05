@@ -46,6 +46,8 @@ Add a track entry
 ###### **Options:**
 
 * `-t`, `--time <TIME>` — Time to set the entry at
+* `-d`, `--date <DATE>` — Date to set the entry at
+* `-s`, `--select` — Select date from an interactive calender to set entry at
 * `-l`, `--long` — Add a long description by opening an editor
 * `--long-text <LONG_TEXT>` — Add a long description as text content
 
@@ -123,6 +125,8 @@ Swaps the next entry with the given timestamp and sets the next entries info to 
 ###### **Options:**
 
 * `-t`, `--time <TIME>` — Time to set the entry at
+* `-d`, `--date <DATE>` — Date to set the entry at
+* `-s`, `--select` — Select date from an interactive calender to set entry at
 * `-l`, `--long` — Add a long description by opening an editor
 * `--long-text <LONG_TEXT>` — Add a long description as text content
 
