@@ -139,9 +139,17 @@ fn paging_view(store: &Store, config: &Config, start_date: NaiveDate, long: bool
             cursor::MoveTo(0, 0)
         )?;
 
+        const SHORT_HELP: &str = " | [← / h] prev. day | [→ / l] next day | [esc / q] quit";
+        const LONG_HELP: &str = " | [← / h] prev. day | [→ / l] next day | [↓ / j] prev. week | [↑ / k] next week | [esc / q] quit";
+
         let header_text = format!(
-            "{:<30} | [← / h] prev. Day | [→ / j] next Day | [esc / q] quit",
-            date.format("%A, %-d %B, %C%y")
+            "{:<30}{}",
+            date.format("%A, %-d %B, %C%y"),
+            match term_width as usize {
+                v if v >= LONG_HELP.len() + 30 => LONG_HELP,
+                v if v >= SHORT_HELP.len() + 30 => SHORT_HELP,
+                _ => "",
+            }
         );
         println_cr!(
             "{}\n",
