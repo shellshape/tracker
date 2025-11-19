@@ -1,4 +1,4 @@
-name: release
+name: Release
 
 on:
   workflow_dispatch:
@@ -6,61 +6,96 @@ on:
     tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
 
 jobs:
-  build-release:
+  build_artifacts:
+    name: Build for ${{ matrix.os_name }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Linux
-          - os: ubuntu-latest
+          - os_name: FreeBSD-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-freebsd
+          - os_name: Linux-x86_64
+            os: ubuntu-latest
             target: x86_64-unknown-linux-musl
-          - os: ubuntu-latest
+          - os_name: Linux-aarch64
+            os: ubuntu-latest
             target: aarch64-unknown-linux-musl
-
-          # Darwin
-          - os: macos-latest
+          - os_name: Linux-arm
+            os: ubuntu-latest
+            target: arm-unknown-linux-musleabi
+          - os_name: Linux-riscv64
+            os: ubuntu-latest
+            target: riscv64gc-unknown-linux-gnu
+          - os_name: Windows-aarch64
+            os: windows-latest
+            target: aarch64-pc-windows-msvc
+            ext: ".exe"
+          - os_name: Windows-x86_64
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            ext: ".exe"
+          - os_name: macOS-x86_64
+            os: macOS-latest
             target: x86_64-apple-darwin
-          - os: macos-latest
+          - os_name: macOS-aarch64
+            os: macOS-latest
             target: aarch64-apple-darwin
 
-          # Windows
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-            ext: .exe
-
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
-
-      - name: Setup Rust toolchain
-        uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v5
+      - name: Cache cargo & target directories
+        uses: Swatinem/rust-cache@v2
+      - name: Install musl-tools on Linux
+        run: sudo apt-get update --yes && sudo apt-get install --yes musl-tools
+        if: contains(matrix.name, 'musl')
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v0
         with:
-          profile: minimal
-          override: true
+          command: "build"
           target: ${{ matrix.target }}
           toolchain: stable
-
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --release --target ${{ matrix.target }}
-
+          args: "--locked --release"
+          strip: true
       - name: Rename Artifacts
         shell: bash
         run: |
-          APP_NAME=tracker
+          APP_NAME={{ project-name }}
           ver=${GITHUB_REF#refs/tags/}
           ASSET_PATH=$APP_NAME-$ver-${{ matrix.target }}${{ matrix.ext }}
           mv target/${{ matrix.target }}/release/$APP_NAME $ASSET_PATH
           echo "ASSET_PATH=$ASSET_PATH" >> $GITHUB_ENV
-
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v5
         with:
-          files: ${{ env.ASSET_PATH }}
+          name: ${{ env.ASSET_PATH }}
+          path: ${{ env.ASSET_PATH }}
+
+  create_release:
+    name: Create GitHub Release
+    needs: build_artifacts
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v5
+        with:
+          path: ./artifacts
+
+      - name: List downloaded files (debug)
+        run: ls -R ./artifacts
+
+      - name: Generate Release Body
+        run: |
+          cargo install git-cliff --locked
+          git-cliff --latest --strip all | sed 1,2d > RELEASE.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/**/*
+          body_path: RELEASE.md
+          draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
