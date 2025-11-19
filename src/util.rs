@@ -69,7 +69,7 @@ impl Entry {
 
         if long {
             if let Some(ref long_message) = self.long {
-                write!(f, "\n{}", prefix_lines(long_message, "\t").italic())?;
+                write!(f, "\n{}", prefix_lines(long_message, "\r\t").italic())?;
             }
         }
 
