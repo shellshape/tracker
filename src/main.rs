@@ -1,5 +1,5 @@
 use anyhow::Result;
-use clap::{Parser, command};
+use clap::Parser;
 use commands::*;
 use config::Config;
 use store::Store;

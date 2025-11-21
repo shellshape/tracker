@@ -22,7 +22,7 @@ impl fmt::Display for PromtYesNoRemember {
 }
 
 impl PromtYesNoRemember {
-    pub fn promt(message: &str) -> inquire::Select<Self> {
+    pub fn promt(message: &str) -> inquire::Select<'_, Self> {
         let options = vec![Self::Yes, Self::No, Self::NoRemember];
         Select::new(message, options)
     }
