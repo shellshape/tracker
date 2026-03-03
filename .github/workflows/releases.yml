@@ -61,7 +61,7 @@ jobs:
       - name: Rename Artifacts
         shell: bash
         run: |
-          APP_NAME={{ project-name }}
+          APP_NAME=tracker
           ver=${GITHUB_REF#refs/tags/}
           ASSET_PATH=$APP_NAME-$ver-${{ matrix.target }}${{ matrix.ext }}
           mv target/${{ matrix.target }}/release/$APP_NAME $ASSET_PATH
