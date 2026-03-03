@@ -1,6 +1,7 @@
 use super::Command;
 use crate::config::Config;
-use crate::store::{Entry, Store};
+use crate::db::Database;
+use crate::model::Entry;
 use crate::util::{FormatableEntry, Parsable, select_date};
 use anyhow::Result;
 use chrono::{Local, NaiveDate, NaiveDateTime, NaiveTime};
@@ -25,14 +26,14 @@ pub struct Edit {
 }
 
 impl Command for Edit {
-    fn run(&self, store: &Store, config: &Config) -> Result<()> {
+    fn run(&self, db: &Database, config: &Config) -> Result<()> {
         let date = match self.date {
             Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
             _ => Local::now().date_naive(),
         };
 
-        let mut entries = store.list(date)?;
+        let mut entries = db.list(date)?;
 
         if entries.is_empty() {
             println!("{}", "There are no entries for this day.".italic().dim());
@@ -82,17 +83,13 @@ impl Command for Edit {
         };
 
         let new: Entry = Entry {
+            id: selected.id,
             timestamp,
             message,
             long,
         };
 
-        let new = entries
-            .iter()
-            .map(|e| if e == selected { new.clone() } else { e.clone() })
-            .collect();
-
-        store.set(selected.timestamp.date(), new)
+        db.update(new)
     }
 }
 

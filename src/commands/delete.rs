@@ -1,6 +1,6 @@
 use super::Command;
 use crate::config::Config;
-use crate::store::Store;
+use crate::db::Database;
 use crate::util::{FormatableEntry, Parsable, select_date};
 use anyhow::Result;
 use chrono::{Local, NaiveDate};
@@ -21,14 +21,14 @@ pub struct Delete {
 }
 
 impl Command for Delete {
-    fn run(&self, store: &Store, config: &Config) -> Result<()> {
+    fn run(&self, db: &Database, config: &Config) -> Result<()> {
         let date = match self.date {
             Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
             _ => Local::now().date_naive(),
         };
 
-        let mut entries = store.list(date)?;
+        let mut entries = db.list(date)?;
 
         if entries.is_empty() {
             println!("{}", "There are no entries for this day.".italic().dim());
@@ -48,12 +48,10 @@ impl Command for Delete {
             .map(|e| e.entry)
             .collect();
 
-        let new = entries
-            .iter()
-            .filter(|&e| !selected.contains(&e))
-            .cloned()
-            .collect();
+        for e in selected {
+            db.delete(e.id)?;
+        }
 
-        store.set(date, new)
+        Ok(())
     }
 }

@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::store::Entry;
+use crate::model::Entry;
 use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use fancy_duration::{AsFancyDuration, AsTimes};

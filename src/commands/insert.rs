@@ -1,6 +1,7 @@
 use super::Command;
 use crate::config::Config;
-use crate::store::{Entry, Store};
+use crate::db::Database;
+use crate::model::{Entry, NewEntry};
 use crate::util::{Parsable, select_date};
 use anyhow::Result;
 use chrono::{DurationRound, Local, NaiveDate, NaiveDateTime, NaiveTime};
@@ -36,7 +37,7 @@ pub struct Insert {
 }
 
 impl Command for Insert {
-    fn run(&self, store: &Store, config: &Config) -> Result<()> {
+    fn run(&self, db: &Database, config: &Config) -> Result<()> {
         if self.message.is_empty() {
             return Err(anyhow::anyhow!("can not use empty message value"));
         }
@@ -66,24 +67,27 @@ impl Command for Insert {
             None => timestamp,
         };
 
-        let mut entries = store.list(timestamp.date())?;
+        let mut entries = db.list(timestamp.date())?;
         entries.sort_by_key(|e| e.timestamp);
 
         let after_entry = entries
-            .iter_mut()
+            .iter()
             .find(|e| e.timestamp > timestamp)
+            .cloned()
             .ok_or_else(|| anyhow::anyhow!("no entries after the given timestamp"))?;
 
         let prev_timestamp = after_entry.timestamp;
-        after_entry.timestamp = timestamp;
 
-        entries.push(Entry {
+        db.update(Entry {
+            timestamp,
+            ..after_entry
+        })?;
+
+        db.add(NewEntry {
             timestamp: prev_timestamp,
             message: self.message.join(" "),
             long,
-        });
-
-        store.set(timestamp.date(), entries)
+        })
     }
 }
 
