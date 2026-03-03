@@ -161,10 +161,10 @@ fn paging_view(store: &Store, config: &Config, start_date: NaiveDate, long: bool
 
         if let Event::Key(event) = event::read()? {
             match event.code {
-                KeyCode::Right | KeyCode::Char('h') => date += TimeDelta::days(1),
-                KeyCode::Left | KeyCode::Char('l') => date -= TimeDelta::days(1),
-                KeyCode::Down | KeyCode::Char('j') => date += TimeDelta::days(7),
-                KeyCode::Up | KeyCode::Char('k') => date -= TimeDelta::days(7),
+                KeyCode::Right | KeyCode::Char('l') => date += TimeDelta::days(1),
+                KeyCode::Left | KeyCode::Char('h') => date -= TimeDelta::days(1),
+                KeyCode::Up | KeyCode::Char('k') => date += TimeDelta::days(7),
+                KeyCode::Down | KeyCode::Char('j') => date -= TimeDelta::days(7),
                 KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('c') => break,
                 _ => {}
             }
