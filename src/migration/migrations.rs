@@ -73,7 +73,7 @@ pub(crate) fn sqlite_database(config: &Config) -> Result<()> {
     }
 
     let mut store = Store::new(&config.storage_dir)?.peekable();
-    if dbg!(store.peek()).is_none() {
+    if store.peek().is_none() {
         return Ok(());
     }
 
