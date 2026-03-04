@@ -1,6 +1,7 @@
 use super::Command;
 use crate::config::Config;
-use crate::store::{Entry, Store};
+use crate::db::Database;
+use crate::model::Entry;
 use crate::util::{Parsable, select_date};
 use anyhow::Result;
 use chrono::{Duration, Local, NaiveDate, TimeDelta};
@@ -43,7 +44,7 @@ pub struct View {
 }
 
 impl Command for View {
-    fn run(&self, store: &Store, config: &Config) -> Result<()> {
+    fn run(&self, db: &Database, config: &Config) -> Result<()> {
         let date = match self.date {
             Some(Parsable(date_str)) => date_str,
             None if self.select => select_date()?,
@@ -51,10 +52,10 @@ impl Command for View {
         };
 
         if self.paging {
-            return paging_view(store, config, date, self.long);
+            return paging_view(db, config, date, self.long);
         }
 
-        let mut entries = store.list(date)?;
+        let mut entries = db.list(date)?;
         entries.sort_by_key(|e| e.timestamp);
 
         if self.csv {
@@ -112,7 +113,7 @@ fn print_entries(config: &Config, entries: &[Entry], long: bool) -> Result<()> {
     Ok(())
 }
 
-fn paging_view(store: &Store, config: &Config, start_date: NaiveDate, long: bool) -> Result<()> {
+fn paging_view(db: &Database, config: &Config, start_date: NaiveDate, long: bool) -> Result<()> {
     terminal::enable_raw_mode()?;
     defer! {
         terminal::disable_raw_mode().ok();
@@ -130,7 +131,7 @@ fn paging_view(store: &Store, config: &Config, start_date: NaiveDate, long: bool
     let mut date = start_date;
 
     loop {
-        let mut entries = store.list(date)?;
+        let mut entries = db.list(date)?;
         entries.sort_by_key(|e| e.timestamp);
 
         execute!(

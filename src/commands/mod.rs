@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::store::Store;
+use crate::db::Database;
 use anyhow::Result;
 
 macro_rules! re_export {
@@ -22,7 +22,7 @@ re_export! {
 }
 
 pub trait Command {
-    fn run(&self, store: &Store, config: &Config) -> Result<()>;
+    fn run(&self, db: &Database, config: &Config) -> Result<()>;
 }
 
 #[macro_export]

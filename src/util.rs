@@ -1,5 +1,5 @@
 use crate::config::Config;
-use crate::store::Entry;
+use crate::model::Entry;
 use anyhow::Result;
 use chrono::{Datelike, Duration, Local, NaiveDate};
 use fancy_duration::{AsFancyDuration, AsTimes};
@@ -67,10 +67,8 @@ impl Entry {
             )?;
         }
 
-        if long {
-            if let Some(ref long_message) = self.long {
-                write!(f, "\n{}", prefix_lines(long_message, "\r\t").italic())?;
-            }
+        if long && let Some(ref long_message) = self.long {
+            write!(f, "\n{}", prefix_lines(long_message, "\r\t").italic())?;
         }
 
         Ok(())

@@ -1,13 +1,13 @@
 use anyhow::Result;
-use clap::{Parser, command};
+use clap::Parser;
 use commands::*;
 use config::Config;
-use store::Store;
 
 mod commands;
 mod config;
-mod migrations;
-mod store;
+mod db;
+mod migration;
+mod model;
 mod util;
 
 /// Simple tool to do time tracking
@@ -37,12 +37,14 @@ fn main() {
 
 #[cfg(not(feature = "clap-markdown"))]
 fn main() -> Result<()> {
+    use crate::db::Database;
+
     let cli = Cli::parse();
     let config = Config::parse(cli.config)?;
 
-    migrations::migrate()?;
+    migration::migrate(&config)?;
 
-    let store = Store::new(&config.storage_dir)?;
+    let db = Database::new(&config.storage_dir)?;
 
-    cli.commands.run(&store, &config)
+    cli.commands.run(&db, &config)
 }
