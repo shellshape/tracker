@@ -72,8 +72,9 @@ pub(crate) fn sqlite_database(config: &Config) -> Result<()> {
         return Ok(());
     }
 
-    let mut store = Store::new(&config.storage_dir)?.peekable();
-    if store.peek().is_none() {
+    let store = Store::new(&config.storage_dir)?;
+    let count = store.file_count()?;
+    if count == 0 {
         return Ok(());
     }
 
@@ -101,7 +102,9 @@ pub(crate) fn sqlite_database(config: &Config) -> Result<()> {
 
     let db = Database::new(&config.storage_dir)?;
 
-    for v in store {
+    println!();
+
+    for (i, v) in store.enumerate() {
         let (path, entries) = v?;
         for entry in entries {
             db.add(NewEntry {
@@ -111,11 +114,17 @@ pub(crate) fn sqlite_database(config: &Config) -> Result<()> {
             })?;
         }
         fs::remove_file(path)?;
+        print!(
+            "{}",
+            format!("\rMigrated {i} of {count} entry files ...")
+                .dim()
+                .italic()
+        );
     }
 
-    println!(
+    print!(
         "{}",
-        "Successfully moved time tracking data to new location.\n".green()
+        "\rSuccessfully migrated tracking data to the SQLite3 database.\n".green()
     );
 
     Ok(())

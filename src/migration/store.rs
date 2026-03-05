@@ -44,15 +44,28 @@ impl FromStr for Entry {
 }
 
 pub struct Store {
+    base_dir: PathBuf,
     rd: ReadDir,
     buf: String,
 }
 
 impl Store {
     pub fn new<P: Into<PathBuf>>(base_dir: P) -> Result<Self> {
-        let rd = base_dir.into().read_dir()?;
+        let base_dir = base_dir.into();
+        let rd = base_dir.read_dir()?;
         let buf = String::new();
-        Ok(Self { rd, buf })
+        Ok(Self { base_dir, rd, buf })
+    }
+}
+
+impl Store {
+    pub fn file_count(&self) -> Result<usize> {
+        Ok(self
+            .base_dir
+            .read_dir()?
+            .filter_map(|r| r.ok())
+            .filter(|e| e.path().extension().is_some_and(|ext| ext == "log"))
+            .count())
     }
 }
 
