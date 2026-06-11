@@ -28,7 +28,7 @@ impl Command for Delete {
             _ => Local::now().date_naive(),
         };
 
-        let mut entries = db.list(date)?;
+        let mut entries = db.list_day(date)?;
 
         if entries.is_empty() {
             println!("{}", "There are no entries for this day.".italic().dim());

@@ -40,7 +40,7 @@ impl Database {
         Ok(())
     }
 
-    pub fn list(&self, date: NaiveDate) -> Result<Vec<Entry>> {
+    pub fn list_day(&self, date: NaiveDate) -> Result<Vec<Entry>> {
         let mut stmt = self.conn.prepare(
             "SELECT id, datetime(date || ' ' || time) as timestamp, message, long
             FROM entry WHERE date = ?",
@@ -54,6 +54,30 @@ impl Database {
             })
         })?;
         Ok(rows.collect::<Result<Vec<_>, _>>()?)
+    }
+
+    pub fn list_range(
+        &self,
+        start: NaiveDate,
+        end: NaiveDate,
+        f: impl Fn(Entry) -> Result<()>,
+    ) -> Result<()> {
+        let mut stmt = self.conn.prepare(
+            "SELECT id, datetime(date || ' ' || time) as timestamp, message, long
+            FROM entry WHERE date >= ? AND date <= ?",
+        )?;
+
+        let mut rows = stmt.query(params![start, end])?;
+        while let Some(row) = rows.next()? {
+            f(Entry {
+                id: row.get(0)?,
+                timestamp: row.get(1)?,
+                message: row.get(2)?,
+                long: row.get(3)?,
+            })?;
+        }
+
+        Ok(())
     }
 
     pub fn update(&self, entry: Entry) -> Result<()> {

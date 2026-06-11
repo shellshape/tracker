@@ -67,7 +67,7 @@ impl Command for Insert {
             None => timestamp,
         };
 
-        let mut entries = db.list(timestamp.date())?;
+        let mut entries = db.list_day(timestamp.date())?;
         entries.sort_by_key(|e| e.timestamp);
 
         let after_entry = entries

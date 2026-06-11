@@ -19,6 +19,7 @@ re_export! {
     delete
     edit
     insert
+    export
 }
 
 pub trait Command {

@@ -28,6 +28,7 @@ register_commands! {
     Delete
     Edit
     Insert
+    Export
 }
 
 #[cfg(feature = "clap-markdown")]

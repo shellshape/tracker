@@ -1,5 +1,6 @@
 use anyhow::Result;
 use chrono::NaiveDateTime;
+use serde::Serialize;
 use std::io::Write;
 
 pub struct NewEntry {
@@ -8,7 +9,7 @@ pub struct NewEntry {
     pub long: Option<String>,
 }
 
-#[derive(Clone, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug, Serialize)]
 pub struct Entry {
     pub id: u32,
     pub timestamp: NaiveDateTime,

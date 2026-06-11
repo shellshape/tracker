@@ -55,7 +55,7 @@ impl Command for View {
             return paging_view(db, config, date, self.long);
         }
 
-        let mut entries = db.list(date)?;
+        let mut entries = db.list_day(date)?;
         entries.sort_by_key(|e| e.timestamp);
 
         if self.csv {
@@ -131,7 +131,7 @@ fn paging_view(db: &Database, config: &Config, start_date: NaiveDate, long: bool
     let mut date = start_date;
 
     loop {
-        let mut entries = db.list(date)?;
+        let mut entries = db.list_day(date)?;
         entries.sort_by_key(|e| e.timestamp);
 
         execute!(
