@@ -27,12 +27,8 @@ pub struct Add {
     select: bool,
 
     /// Add a long description by opening an editor
-    #[arg(short, long)]
-    long: bool,
-
-    /// Add a long description as text content
-    #[arg(long)]
-    long_text: Option<String>,
+    #[arg(short, long, num_args = 0..=1, default_missing_value = "PROMPT")]
+    long: Option<String>,
 }
 
 impl Command for Add {
@@ -53,12 +49,10 @@ impl Command for Add {
             None => now,
         };
 
-        let long = match self.long_text {
-            Some(ref txt) => Some(txt.clone()),
-            None => match self.long {
-                true => prompt_long()?,
-                false => None,
-            },
+        let long = match self.long.as_deref() {
+            None => None,
+            Some("PROMPT") => prompt_long()?,
+            Some(v) => Some(v.to_string()),
         };
 
         let timestamp = match config.round_steps {
