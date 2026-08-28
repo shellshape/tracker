@@ -20,6 +20,7 @@ re_export! {
     edit
     insert
     export
+    info
 }
 
 pub trait Command {

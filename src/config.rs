@@ -2,7 +2,8 @@ use anyhow::Result;
 use fancy_duration::FancyDuration;
 use figment::Figment;
 use figment::providers::{Format, Json, Toml, Yaml};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use std::fmt;
 use std::ops::Deref;
 use std::path::{Path, PathBuf};
 
@@ -36,7 +37,7 @@ pub fn default_storage_dir() -> PathBuf {
         .join("time_trackings")
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct Config {
     #[serde(default = "default_storage_dir")]
     pub storage_dir: PathBuf,
@@ -52,6 +53,24 @@ pub struct Config {
     pub end_regex: String,
 
     pub round_steps: Option<FancyDuration<chrono::Duration>>,
+
+    #[serde(skip)]
+    config_path: Option<PathBuf>,
+}
+
+fn merge_from_file(figment: Figment, path: impl AsRef<Path>) -> Result<Figment> {
+    match path
+        .as_ref()
+        .extension()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .deref()
+    {
+        "yml" | "yaml" => Ok(figment.merge(Yaml::file(path))),
+        "toml" => Ok(figment.merge(Toml::file(path))),
+        "json" => Ok(figment.merge(Json::file(path))),
+        _ => Err(anyhow::anyhow!("invalid config file type")),
+    }
 }
 
 impl Config {
@@ -65,27 +84,46 @@ impl Config {
             .map(|d| d.join(package_name!()))
             .ok_or_else(|| anyhow::anyhow!("could not resolve project directories"))?;
 
-        Ok(Figment::new()
-            .merge(Toml::file(local_config_name!(".toml")))
-            .merge(Yaml::file(local_config_name!(".yaml")))
-            .merge(Json::file(local_config_name!(".json")))
-            .merge(Toml::file(dirs.join("config.toml")))
-            .merge(Yaml::file(dirs.join("config.yml")))
-            .merge(Json::file(dirs.join("config.json")))
-            .extract()?)
+        let candidates = [
+            PathBuf::from(local_config_name!(".toml")),
+            PathBuf::from(local_config_name!(".yaml")),
+            PathBuf::from(local_config_name!(".json")),
+            dirs.join("config.toml"),
+            dirs.join("config.yml"),
+            dirs.join("config.json"),
+        ];
+
+        let mut figment = Figment::new();
+        for path in &candidates {
+            figment = merge_from_file(figment, path)?;
+        }
+
+        let mut config: Self = figment.extract()?;
+        config.config_path = candidates.into_iter().rev().find(|p| p.exists());
+
+        Ok(config)
     }
 
     pub fn parse_from_file<T: AsRef<Path>>(path: T) -> Result<Self> {
-        let ext = path.as_ref().extension().unwrap_or_default();
+        let path = path.as_ref();
         let mut figment = Figment::new();
 
-        figment = match ext.to_string_lossy().deref() {
-            "yml" | "yaml" => figment.merge(Yaml::file(path)),
-            "toml" => figment.merge(Toml::file(path)),
-            "json" => figment.merge(Json::file(path)),
-            _ => return Err(anyhow::anyhow!("invalid config file type")),
-        };
+        figment = merge_from_file(figment, path)?;
 
-        Ok(figment.extract()?)
+        let mut config: Self = figment.extract()?;
+        config.config_path = Some(path.to_path_buf());
+
+        Ok(config)
+    }
+
+    pub fn path(&self) -> Option<&Path> {
+        self.config_path.as_deref()
+    }
+}
+
+impl fmt::Display for Config {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = serde_json::ser::to_string_pretty(self).expect("config as json");
+        f.write_str(&s)
     }
 }

@@ -5,7 +5,7 @@ use include_dir::{Dir, include_dir};
 use rusqlite::{Connection, params};
 use rusqlite_migration::Migrations;
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::LazyLock;
 
 static MIGRATIONS_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/migrations");
@@ -15,15 +15,17 @@ static MIGRATIONS: LazyLock<Migrations<'static>> =
 
 pub struct Database {
     conn: Connection,
+    path: PathBuf,
 }
 
 impl Database {
     pub fn new<P: AsRef<Path>>(base_dir: P) -> Result<Self> {
         let base_dir = base_dir.as_ref();
         fs::create_dir_all(base_dir)?;
-        let mut conn = Connection::open(base_dir.join("db.sqlite"))?;
+        let path = base_dir.join("db.sqlite");
+        let mut conn = Connection::open(&path)?;
         MIGRATIONS.to_latest(&mut conn)?;
-        Ok(Self { conn })
+        Ok(Self { conn, path })
     }
 
     pub fn add(&self, entry: NewEntry) -> Result<()> {
@@ -103,5 +105,9 @@ impl Database {
             params![id],
         )?;
         Ok(())
+    }
+
+    pub fn path(&self) -> &Path {
+        return &self.path;
     }
 }
