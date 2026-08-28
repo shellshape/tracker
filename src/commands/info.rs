@@ -8,7 +8,7 @@ use std::path::Path;
 
 /// Show information like config or database location
 #[derive(Args)]
-pub struct Info {}
+pub struct Info;
 
 impl Command for Info {
     fn run(&self, db: &Database, config: &Config) -> Result<()> {

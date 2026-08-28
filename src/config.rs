@@ -106,6 +106,10 @@ impl Config {
 
     pub fn parse_from_file<T: AsRef<Path>>(path: T) -> Result<Self> {
         let path = path.as_ref();
+        if !path.exists() {
+            return Err(anyhow::anyhow!("config file does not exist: {path:?}"));
+        }
+
         let mut figment = Figment::new();
 
         figment = merge_from_file(figment, path)?;
